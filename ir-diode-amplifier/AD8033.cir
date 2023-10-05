@@ -1,0 +1,95 @@
+* AD8033 Spice Model
+* Description: Amplifier
+* Generic Desc: Single  high-speed FET input amplifier
+* Developed by: TRW/ADI
+* Revision History: 08/10/2012 - Updated to new header style
+* 5.0
+* Copyright 2012 by Analog Devices, Inc.
+*
+* Refer to http://www.analog.com/Analog_Root/static/techSupport/designTools/spiceModels/license/spice_general.html for License Statement.
+* Use of this model indicates your acceptance with the terms and provisions in the License Statement.
+*
+* BEGIN Notes:
+*
+* Not Modeled:
+*       distortion is not characterized       
+*	output current limit is not characterized
+*
+* Parameters modeled include:
+*       output clamping voltage
+*	input common mode range for FET input
+*       input impedance			
+*       slew rate
+*       Vos is static and will not vary
+*
+* END Notes
+*
+* Node assignments
+*              non-inverting input
+*              | inverting input
+*              | | positive supply
+*              | | |  negative supply
+*              | | |  |  output
+*              | | |  |  |
+.SUBCKT AD8033 1 2 99 50 45
+				 
+* FET INPUT STAGE
+Ib1 1 98 7p
+ib2 2 98 7P
+
+Vos 2 9 1e-3
+J1 5 9 10 NMOD 
+J2 6 1 10 NMOD 
+R3 99 5 rnoise 1k
+R4 99 6 rnoise 1k
+I1 10 50 1e-3
+*Cin1 1 98 1p
+*Cin2 2 98 1p
+			  
+* GAIN STAGE & POLE AT 2 kHz
+Eref 98 0 POLY(2) 99 0 50 0 0 .5 .5 
+G1 98 13 5 6 3.137m
+R7 13 98 rnoise 12.732Meg
+C3 13 98 1.25e-11
+V1 99 14 0.767
+V2 16 50 0.777
+D1 13 14 DX
+D2 16 13 DX
+
+*POLE AT 60 MHz
+G2 98 43 13 98 1
+R10 43 98 rnoise 1
+C5 43 98 2.65n
+
+*POLE AT 100 MHz
+G3 98 53 43 98 1
+R11 53 98 rnoise 1
+C6 53 98 1.59n
+
+*POLE AT 300MHz
+G4 98 63 53 98 1
+Rp11 63 98 rnoise 1
+Cp11 63 98 159p
+
+* BUFFER STAGE
+Gbuf 98 32 63 98 1e-3
+Rbuf 32 98 rnoise 1000
+
+* OUTPUT STAGE
+
+Iq 99 50 2.3e-3
+R13 99 44 20
+R14 44 50 20
+G13 44 99 99 32 .05
+G14 50 44 32 50 .05
+Vout 44 45 0
+
+.MODEL NMOD NJF(VTO=-2 beta=5e-4 IS=1.5e-12)
+.MODEL DX D(IS=1e-15) 
+.model rnoise RES(t_abs=-273)
+.model dz d(bv=50)
+.ENDS
+
+
+
+
